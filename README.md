@@ -2,7 +2,7 @@
 
 一个基于 Flask 的古典诗词查询网站，支持自然语言提问，结合 SPARQL 知识图谱与 AI（DeepSeek API）进行解析与展示。
 
-[👉 在线演示（Render）](https://你的-render-地址.onrender.com)
+[👉 在线演示（Render）](https://poetry-search-system.onrender.com)
 
 ---
 
