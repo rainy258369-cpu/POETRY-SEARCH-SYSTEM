@@ -1,3 +1,4 @@
+app = Flask(__name__)
 from flask import Flask, request, render_template, jsonify
 from rdflib import Graph
 from pathlib import Path
@@ -6,7 +7,7 @@ import re
 import requests
 import json
 
-app = Flask(__name__)
+
 
 # 1. 加载 TTL 数据文件
 
