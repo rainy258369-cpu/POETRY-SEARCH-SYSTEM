@@ -18,9 +18,10 @@ g.parse(DATA_DIR / "out_poem_decoded.ttl", format="turtle")
 g.parse(DATA_DIR / "ctext.ttl", format="turtle")
 print(f"知识图谱已加载，共 {len(g)} 条三元组")
 
-# DeepSeek API 配置
-DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
-DEEPSEEK_API_KEY = "sk-156a8f4acc104d1ca155c206dd4d6173"
+import os
+
+DEEPSEEK_API_URL = os.environ.get("DEEPSEEK_API_URL", "https://api.deepseek.com/v1/chat/completions")
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 
 
 class SPARQLPoetryProcessor:
