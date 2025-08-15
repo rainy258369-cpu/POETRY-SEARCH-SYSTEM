@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古典诗歌知识图谱查询系统</title>
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 顶部古画背景区域 -->
+    <div class="maintopbc">
+        <div class="maintop">
+            <div class="title-container">
+                <h1 class="main-title">中华古诗词查询系统</h1>
+                <h2 class="subtitle">探索千年诗韵，品味文化精髓</h2>
+            </div>
+            <div class="search-container">
+                <form id="search-form" onsubmit="return handleSearchSubmit(event)">
+                    <div class="query-box">
+                        <input type="text" class="query-input" id="query-input" name="query"
+                               placeholder="输入查询问题，例如：李白的作品有哪些？静夜思的作者是谁？">
+                        <button type="submit" class="btn-query">
+                            <i class="fas fa-search"></i> 开始查询
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-main">
+        <div class="main-container">
+            <div class="main-content">
+                <div class="featured-poems">
+                    <h3><i class="fas fa-star"></i> 经典诗词推荐</h3>
+                    <div class="poem-grid">
+                        <div class="poem-card" onclick="performSearch('静夜思')">
+                            <div class="poem-title">《静夜思》</div>
+                            <div class="poem-author">李白</div>
+                            <div class="poem-content">床前明月光，疑是地上霜。举头望明月，低头思故乡。</div>
+                        </div>
+                        <div class="poem-card" onclick="performSearch('春晓')">
+                            <div class="poem-title">《春晓》</div>
+                            <div class="poem-author">孟浩然</div>
+                            <div class="poem-content">春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。</div>
+                        </div>
+                        <div class="poem-card" onclick="performSearch('登鹳雀楼')">
+                            <div class="poem-title">《登鹳雀楼》</div>
+                            <div class="poem-author">王之涣</div>
+                            <div class="poem-content">白日依山尽，黄河入海流。欲穷千里目，更上一层楼。</div>
+                        </div>
+                        <div class="poem-card" onclick="performSearch('相思')">
+                            <div class="poem-title">《相思》</div>
+                            <div class="poem-author">王维</div>
+                            <div class="poem-content">红豆生南国，春来发几枝。愿君多采撷，此物最相思。</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar">
+                <div class="example-queries">
+                    <h3><i class="fas fa-lightbulb"></i> 热门查询</h3>
+                    <!-- 修改示例查询部分的代码 -->
+                    <ul class="example-list">
+                        <li class="example-item" onclick="performSearch('李白的作品有哪些')">李白作品</li>
+                        <li class="example-item" onclick="performSearch('杜甫的生卒年份')">杜甫生卒</li>
+                        <li class="example-item" onclick="performSearch('苏轼是哪个朝代的')">苏轼朝代</li>
+                        <li class="example-item" onclick="performSearch('静夜思是谁写的')">静夜思作者</li>
+                        <li class="example-item" onclick="performSearch('唐代的诗人有哪些')">唐代诗歌特点</li>
+                        <li class="example-item" onclick="performSearch('将进酒')">将近酒</li>
+                        <li class="example-item" onclick="performSearch('春晓的译文')">春晓译文</li>
+                        <li class="example-item" onclick="performSearch('登鹳雀楼的赏析')">登鹳雀楼</li>
+                        <li class="example-item" onclick="performSearch('李清照生平及其作品')">李清照</li>
+                    </ul>
+                </div>
+                
+                <div class="recommendation">
+                    <h3><i class="fas fa-history"></i> 历史今日</h3>
+                    <ul class="recommend-list">
+                        <li><i class="fas fa-calendar-day"></i> 公元763年 - 杜甫逝世</li>
+                        <li><i class="fas fa-calendar-day"></i> 公元701年 - 李白出生</li>
+                        <li><i class="fas fa-calendar-day"></i> 公元1037年 - 苏轼出生</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2023 古典诗歌知识图谱查询系统 | 传承中华文化精髓</p>
+        </div>
+    </footer>
+
+    <script>
+        // 填充查询函数（用于示例点击）
+    function fillQuery(query) {
+        document.getElementById('query-input').value = query;
+    }
+
+    // 执行搜索函数（用于热门查询点击）
+    function performSearch(query) {
+        window.open(`/result?query=${encodeURIComponent(query)}`, '_blank');
+    }
+
+    // 搜索提交处理函数
+    function handleSearchSubmit(event) {
+        event.preventDefault();
+        const query = document.getElementById('query-input').value.trim();
+        if (!query) {
+            alert('请输入查询问题');
+            return false;
+        }
+        
+        window.open(`/result?query=${encodeURIComponent(query)}`, '_blank');
+        return false;
+    }
+
+
+        // 修改搜索表单提交处理
+    document.getElementById('search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const query = document.getElementById('query-input').value.trim();
+        if (!query) {
+            alert('请输入查询问题');
+            return;
+        }
+        window.open(`/result?query=${encodeURIComponent(query)}`, '_blank');
+    });
+
+        // 允许按Enter键搜索
+    document.getElementById('query-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const query = this.value.trim();
+            if (!query) {
+                alert('请输入查询问题');
+                return;
+            }
+            window.open(`/result?query=${encodeURIComponent(query)}`, '_blank');
+        }
+    });
+
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const examples = [
+                "李白的诗歌有哪些",
+                "杜甫的生卒年份",
+                "苏轼是哪个朝代的",
+                "静夜思是谁写的",
+                "包含明月的诗",
+                "春晓的译文",
+                "登鹳雀楼的赏析"
+            ];
+            const input = document.getElementById('query-input');
+            input.placeholder = `尝试查询: ${examples[Math.floor(Math.random() * examples.length)]}...`;
+        });
+    </script>
+</body>
+</html>

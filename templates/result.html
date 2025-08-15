@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查询结果 - 古典诗歌知识图谱查询系统</title>
+    <link href="{{ url_for('static', filename='result.css') }}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+   <div class="top-nav">
+    <div class="container">
+        <a href="javascript:void(0);" onclick="returnToHome()" class="back-home">
+            <i class="fas fa-home"></i> 返回首页
+        </a>
+        <form class="search-box" target="_blank" action="/result" method="get">
+            <input type="text" id="search-input" name="query" placeholder="输入新的查询...">
+            <button type="submit"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
+</div>
+
+    <!-- 主内容区域 -->
+    <div class="container">
+        <div class="result-header">
+            <h1 id="query-display">"{{ query }}"的查询结果</h1>
+            <div class="result-meta">
+                <span id="result-count"></span>
+                <span id="search-time"></span>
+            </div>
+        </div>
+
+        <div class="result-container">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>正在查询中，请稍候...</p>
+            </div>
+
+            <div class="result-content" id="result-content">
+                <!-- 结果将通过JavaScript动态填充 -->
+            </div>
+
+            <div class="author-info" id="author-info">
+                <!-- 作者信息将通过JavaScript动态填充 -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2023 古典诗歌知识图谱查询系统 | 传承中华文化精髓</p>
+        </div>
+    </footer>
+
+    <script>
+    // 获取查询参数
+    const query = "{{ query }}";
+    
+    // 显示加载动画
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('query-display').textContent = `"${query}"的查询结果`;
+        fetchResults(query);
+    });
+
+    function fetchResults(query) {
+        fetch(`/query?query=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                displayResults(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('loading').innerHTML = 
+                    '<div class="error">查询失败，请重试</div>';
+            });
+    }
+
+    function displayResults(data) {
+        const resultContent = document.getElementById('result-content');
+        
+        if (data.source === 'ai') {
+            // AI回答的格式
+            resultContent.innerHTML = `
+                <div class="single-result">
+                    <div class="ai-tag"><i class="fas fa-robot"></i> AI分析结果</div>
+                    <p>${data.result[0].replace(/\n/g, '</p><p>')}</p>
+                </div>
+            `;
+        } else if (data.status === 'full_poem_info') {
+            // 完整诗歌信息
+            let html = `<div class="poem-display">`;
+            
+            // 添加标题和作者
+            html += `
+                <div class="poem-title">${data.result[0].split(': ')[1]}</div>
+                <div class="poem-author">${data.result[1].split(': ')[1]}</div>
+            `;
+            
+            // 添加内容（保留原有格式）
+            const content = data.result.find(r => r.startsWith('内容: '));
+            if (content) {
+                html += `<div class="poem-content">${content.split(': ')[1].replace(/。/g, '。<br>')}</div>`;
+            }
+            
+            // 添加其他信息
+            html += `<div class="poem-meta">`;
+            for (const line of data.result.slice(2)) {
+                if (line.startsWith('译文: ') || line.startsWith('赏析: ') || line.startsWith('分析: ')) {
+                    html += `
+                        <div class="poem-section">
+                            <h4>${line.split(': ')[0]}</h4>
+                            <p>${line.split(': ')[1]}</p>
+                        </div>
+                    `;
+                }
+            }
+            html += `</div></div>`;
+            
+            resultContent.innerHTML = html;
+        } 
+         else if (Array.isArray(data.result) && data.prompt && data.prompt.includes("的诗歌作品有")) {
+        // 专门处理作者作品列表
+        let html = '<div class="single-result">';
+        html += `<h3>${data.prompt}</h3>`;
+        
+        html += '<ul class="poem-list">';
+        data.result.forEach(item => {
+            // 确保item是字符串（标题）
+            const title = typeof item === 'string' ? item : item.title;
+            // 移除可能存在的《》符号
+            const cleanTitle = title.replace(/[《》]/g, '');
+            html += `
+                <li class="poem-item" onclick="performSearch('${cleanTitle}')">
+                    ${title}
+                </li>`;
+        });
+        html += '</ul></div>';
+        resultContent.innerHTML = html;
+    }
+        else {
+            // 普通列表结果
+            let html = '<div class="single-result">';
+            if (data.prompt) {
+                html += `<h3>${data.prompt}</h3>`;
+            }
+            
+            if (Array.isArray(data.result)) {
+                if (data.result.length === 1) {
+                    html += `<p>${data.result[0]}</p>`;
+                } else {
+                    html += '<ul>';
+                    data.result.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += '</ul>';
+                }
+            } else if (typeof data.result === 'string') {
+                html += `<p>${data.result}</p>`;
+            }
+            
+            html += '</div>';
+            resultContent.innerHTML = html;
+        }
+        
+    }
+
+    // 执行搜索函数（全局可用）
+    function performSearch(query) {
+        window.open(`/result?query=${encodeURIComponent(query)}`, '_blank');
+    }
+       
+    
+    // 返回首页函数
+    function returnToHome() {
+        window.location.href = '/';
+        return false;
+    }
+</script>
+</body>
+</html>
