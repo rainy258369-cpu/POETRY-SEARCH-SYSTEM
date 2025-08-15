@@ -1,3 +1,5 @@
+app = Flask(__name__)
+
 from flask import Flask, request, render_template, jsonify
 from rdflib import Graph
 from pathlib import Path
@@ -9,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-app = Flask(__name__)
+
 
 # 1. 加载 TTL 数据文件
 
