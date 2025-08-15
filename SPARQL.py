@@ -5,6 +5,9 @@ import pandas as pd
 import re
 import requests
 import json
+from dotenv import load_dotenv
+load_dotenv()
+
 
 app = Flask(__name__)
 
