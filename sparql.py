@@ -203,6 +203,16 @@ def result():
     df = processor.search(query)
     return render_template("result.html", query=query, results=df.to_dict(orient="records"))
 
+@app.route("/query", methods=["GET"])
+def query_api():
+    query = request.args.get("query", "").strip()
+    if not query:
+        return jsonify({"error": "请输入查询内容"})
+    df = processor.search(query)
+    return jsonify({
+        "result": df.to_dict(orient="records"),
+        "status": "ok"
+    })
 
 
 if __name__ == "__main__":
