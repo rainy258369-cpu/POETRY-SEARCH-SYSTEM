@@ -1,5 +1,3 @@
-app = Flask(__name__)
-
 from flask import Flask, request, render_template, jsonify
 from rdflib import Graph
 from pathlib import Path
@@ -7,11 +5,8 @@ import pandas as pd
 import re
 import requests
 import json
-from dotenv import load_dotenv
-load_dotenv()
 
-
-
+app = Flask(__name__)
 
 # 1. 加载 TTL 数据文件
 
@@ -20,12 +15,11 @@ DATA_DIR = BASE_DIR / "data"
 
 g = Graph()
 g.parse(DATA_DIR / "out_poem_decoded.ttl", format="turtle")
-g.parse(DATA_DIR / "ctext.ttl", format="turtle")
 print(f"知识图谱已加载，共 {len(g)} 条三元组")
 
 import os
 
-DEEPSEEK_API_URL = os.environ.get("DEEPSEEK_API_URL", "https://api.deepseek.com/v1/chat/completions")
+DEEPSEEK_API_URL = os.environ.get("DEEPSEEK_API_URL", "")
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 
 
@@ -209,16 +203,6 @@ def result():
     df = processor.search(query)
     return render_template("result.html", query=query, results=df.to_dict(orient="records"))
 
-@app.route("/query", methods=["GET"])
-def query_api():
-    query = request.args.get("query", "").strip()
-    if not query:
-        return jsonify({"error": "请输入查询内容"})
-    df = processor.search(query)
-    return jsonify({
-        "result": df.to_dict(orient="records"),
-        "status": "ok"
-    })
 
 
 if __name__ == "__main__":
