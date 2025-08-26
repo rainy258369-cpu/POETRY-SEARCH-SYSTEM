@@ -177,6 +177,36 @@ class SPARQLPoetryProcessor:
                     """
                     return self.process_results(self.execute_query(query))
         return pd.DataFrame()
+    
+    def query_ai(self, question: str):
+        """调用 DeepSeek AI 接口兜底"""
+        if not DEEPSEEK_API_URL or not DEEPSEEK_API_KEY:
+            return {"error": "AI 接口未配置"}
+
+        try:
+            headers = {
+                "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": "deepseek-chat",   # 模型名可根据部署情况调整
+                "messages": [
+                    {"role": "system", "content": "你是一个古诗词问答助手。"},
+                    {"role": "user", "content": question}
+                ],
+                "temperature": 0.7
+            }
+            resp = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload, timeout=15)
+            resp.raise_for_status()
+            data = resp.json()
+            # 根据 DeepSeek 接口返回格式解析
+            if "choices" in data and len(data["choices"]) > 0:
+                content = data["choices"][0]["message"]["content"]
+                return {"result": [content], "status": "ai", "source": "ai"}
+            else:
+                return {"error": "AI 无返回"}
+        except Exception as e:
+            return {"error": f"AI 查询失败: {e}"}
 
 
 processor = SPARQLPoetryProcessor()
@@ -204,15 +234,30 @@ def result():
     df = processor.search(query)
     return render_template("result.html", query=query, results=df.to_dict(orient="records"))
 
+
 @app.route("/query", methods=["GET"])
 def query_api():
     query = request.args.get("query", "").strip()
     if not query:
         return jsonify({"error": "请输入查询内容"})
+
     df = processor.search(query)
+
+    if df.empty:
+        # 调用 AI 查询兜底
+        ai_result = processor.query_ai(query)
+        return jsonify(ai_result)
+
+    # 把 DataFrame 转成字符串列表
+    result_list = []
+    for row in df.to_dict(orient="records"):
+        values = list(row.values())
+        result_list.extend(values)
+
     return jsonify({
-        "result": df.to_dict(orient="records"),
-        "status": "ok"
+        "result": result_list,
+        "status": "ok",
+        "prompt": f"{query} 的查询结果如下："
     })
 
 
